@@ -39,35 +39,35 @@ void pthread_usleep_np(unsigned long usec);
  * H, M, or S, hours, minutes or seconds    
  */
 void
-parse_time(char *p)
+parse_time(char *p, int *time, int *secs)
 {
   size_t x = 0;
-  my.time = my.secs = 0;
+  *time = *secs = 0;
 
   while (ISDIGIT(p[x]))
     x++;
   if (x==0) return;
-  my.time = atoi(substring(p, 0, x));
+  *time = atoi(substring(p, 0, x));
 
   for (; x < strlen(p); x ++)
     switch (TOLOWER(p[x])) {
       case 's':
-        my.secs = my.time;
-        my.time = 1;
+        *secs = *time;
+        *time = 1;
         return;
       case 'm':
-        my.secs = my.time * 60;
-        my.time = 1;
+        *secs = *time * 60;
+        *time = 1;
         return;
       case 'h':
-        my.secs = my.time * 3600;
-        my.time = 1;
+        *secs = *time * 3600;
+        *time = 1;
         return;
       default:
         break;
     }
-  if ((my.time > 0) && (my.secs <= 0)) {
-    my.secs = my.time * 60;
+  if ((*time > 0) && (*secs <= 0)) {
+    *secs = *time * 60;
   }
 
   return;

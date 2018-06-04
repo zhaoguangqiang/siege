@@ -26,7 +26,7 @@
 #include <setup.h>
 #include <joedog/boolean.h>
 
-void    parse_time(char *p);
+void    parse_time(char *p, int *time, int *secs);
 float   elapsed_time(clock_t time);
 char *  substring(char *str, int start, int len);
 void    pthread_sleep_np(unsigned int seconds); 

@@ -198,7 +198,9 @@ parse_cmdline(int argc, char *argv[])
 {
   int c = 0;
   int nargs;
-  while ((c = getopt_long(argc, argv, "VhvqCDNFpgl::ibr:t:f:d:c:m:H:R:A:T:", long_options, (int *)0)) != EOF) {
+  int time;
+  int secs;
+  while ((c = getopt_long(argc, argv, "VhvqCDNFpgl::ibr:t:I:f:d:c:m:H:R:A:T:", long_options, (int *)0)) != EOF) {
   switch (c) {
       case 'V':
         display_version(TRUE);
@@ -263,8 +265,14 @@ parse_cmdline(int argc, char *argv[])
         }
         break;
       case 't':
-        parse_time(optarg);
+        parse_time(optarg, &time, &secs);
+		my.time = time;
+		my.secs = secs;
         break;
+      case 'I':
+	  	parse_time(optarg, &time, &secs);
+		my.intervalTime = time;
+		my.intervalSecs = secs;
       case 'f':
         memset(my.file, 0, sizeof(my.file));
         if(optarg == NULL) break; /*paranoia*/
@@ -486,6 +494,7 @@ main(int argc, char *argv[])
   data_set_start(data);
   for (i = 0; i < my.cusers && crew_get_shutdown(crew) != TRUE; i++) {
     BROWSER B = (BROWSER)array_get(browsers, i);
+	B.interval_time = my.intervalSecs;
     result = crew_add(crew, (void*)start, B);
     if (result == FALSE) { 
       my.verbose = FALSE;
@@ -513,6 +522,10 @@ main(int argc, char *argv[])
     data_increment_fail (data, browser_get_fail(B));
     data_set_highest    (data, browser_get_himark(B));
     data_set_lowest     (data, browser_get_lomark(B));
+	int j =0;
+	int count = browser_get_hits_array_num(B);
+	for (j = 0; j < count; j++)
+		data_set_hits_array(data, browser_get_hits_array(B), count);
   } crew_destroy(crew);
 
   pthread_usleep_np(10000);
@@ -540,6 +553,11 @@ main(int argc, char *argv[])
     fprintf(stderr, "Failed transactions:\t%12u\n",          my.failed);
     fprintf(stderr, "Longest transaction:\t%12.2f\n",        data_get_highest(data));
     fprintf(stderr, "Shortest transaction:\t%12.2f\n",       data_get_lowest(data));
+	fprintf(stderr, "Hits rate graph:\n");
+    int count = data->hits_array_num;
+	for (j = 1; j <= count; j++)
+      fprintf(stderr, "%d-%d:%d\n", j*my.intervalTime, j*my.intervalTime, data->hits_array[j-1]);
+	
     fprintf(stderr, " \n");
   }
   if (my.mark)    mark_log_file(my.markstr);

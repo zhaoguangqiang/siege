@@ -93,6 +93,12 @@ struct BROWSER_T
       TYPE proxy;
     } type;
   } auth;
+
+  clock_t begin;
+  unsigned int  interval_time;
+  unsigned int  *hits_array;
+  unsigned int  interval_count;
+  
   unsigned int  code;
   unsigned int  count;
   unsigned int  okay;
@@ -126,6 +132,7 @@ BROWSER
 new_browser(int id)
 {
   BROWSER this;
+  struct   tms t_start;
 
   this = calloc(BROWSERSIZE,1);
   this->id        = id;
@@ -141,6 +148,11 @@ new_browser(int id)
   this->urls      = NULL;
   this->parts     = new_array();
   this->rseed     = urandom();
+
+  this->begin     = times(&t_start);
+  this->hits_array= NULL
+  this->interval_count = 0;
+  this->interval_time  = 0;
   return this;
 }
 
@@ -161,10 +173,26 @@ browser_destroy(BROWSER this)
       }
       this->parts = array_destroy(this->parts);
     }
+
+    if (this->hits_array != NULL)
+	  xfree(this->hits_array);
+		
     xfree(this);
   }
   this = NULL;
   return this; 
+}
+
+unsigned int *
+browser_get_hits_array(BROWSER this)
+{
+	return this->hits_array;
+}
+
+unsigned int
+browser_get_hits_array_num(BROWSER this)
+{
+	return this->interval_count;
 }
 
 unsigned long
@@ -716,6 +744,11 @@ __http(BROWSER this, URL U)
   }
 
   this->hits++;
+
+  int interval_num = (stop - this->begin)/this->interval_time;
+  this->hits_array[interval_num] = this->hits;
+  this->interval_count = interval_num;
+  	
   resp = response_destroy(resp);
 
   return TRUE;

@@ -171,6 +171,8 @@ struct CONFIG
   BOOLEAN timestamp;    /* timestamp the output                    */
   int     time;         /* length of the siege in hrs, mins, secs  */
   int     secs;         /* time value for the lenght of the siege  */
+  int     intervalTime;
+  int     intervalSecs;
   int     reps;         /* reps to run the test, default infinite  */ 
   char    file[128];    /* urls.txt file, default in joepath.h     */
   int     length;       /* length of the urls array, made global   */

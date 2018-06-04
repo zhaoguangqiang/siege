@@ -61,6 +61,8 @@ struct DATA_T
   unsigned int  okay;
   unsigned int  fail;
   unsigned long long bytes;
+  unsigned int  *hits_array;
+  unsigned int  hits_array_num;
 };
 
 DATA
@@ -78,12 +80,15 @@ new_data()
   this->highest   = 0.0;
   this->elapsed   = 0.0;
   this->bytes     = 0.0;
+  this->hits_array = NULL;
+  this->hits_array_num = 0;
   return this;
 }
 
 DATA
 data_destroy(DATA this)
 {
+  xfree(this->hitsArray);
   xfree(this);
   return NULL;
 } 
@@ -160,6 +165,25 @@ data_set_lowest(DATA this, float lowest)
     this->lowest = lowest;
   }
   return;
+}
+
+void
+data_set_hits_array(DATA this, unsigned int *hits_array, int array_num)
+{
+  int i = 0;
+  
+  if (this->hits_array == NULL) {
+	this->hits_array = (unsigned int*)xmalloc(array_num + 1);
+	this->hits_array_num = array_num;
+  }
+  
+  for (i = 0; i < array_num; i++)
+  {
+    if (i == 0)
+      this->hits_array[0] = hits_array[0];
+    else
+      this->hits_array[i] = hits_array[i] - hits_array[i - 1];
+  }
 }
 
 unsigned int
