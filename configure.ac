@@ -519,7 +519,7 @@ $PLATFORM
 _EOF_
 ], [PLATFORM=$PLATFORM])
 
-AC_OUTPUT(Makefile src/Makefile doc/Makefile html/Makefile include/Makefile include/joedog/Makefile utils/Makefile)
+AC_OUTPUT(Makefile src/Makefile html/Makefile include/Makefile include/joedog/Makefile utils/Makefile)
 
 echo
 echo "--------------------------------------------------------"

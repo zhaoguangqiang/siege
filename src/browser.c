@@ -150,7 +150,7 @@ new_browser(int id)
   this->rseed     = urandom();
 
   this->begin     = times(&t_start);
-  this->hits_array= NULL
+  this->hits_array= NULL;
   this->interval_count = 0;
   this->interval_time  = 0;
   return this;
@@ -389,6 +389,12 @@ start(BROWSER this)
   this->conn = NULL;
 
   return NULL;
+}
+
+void
+browser_set_interval_time(BROWSER this, unsigned int interval_time)
+{
+  this->interval_time = interval_time;
 }
 
 void

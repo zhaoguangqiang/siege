@@ -88,7 +88,7 @@ new_data()
 DATA
 data_destroy(DATA this)
 {
-  xfree(this->hitsArray);
+  xfree(this->hits_array);
   xfree(this);
   return NULL;
 } 
@@ -184,6 +184,18 @@ data_set_hits_array(DATA this, unsigned int *hits_array, int array_num)
     else
       this->hits_array[i] = hits_array[i] - hits_array[i - 1];
   }
+}
+
+unsigned int
+data_get_hits_array_num(DATA this)
+{
+  return this->hits_array_num;
+}
+
+unsigned int *
+data_get_hits_array(DATA this)
+{
+  return this->hits_array;
 }
 
 unsigned int

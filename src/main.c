@@ -494,7 +494,7 @@ main(int argc, char *argv[])
   data_set_start(data);
   for (i = 0; i < my.cusers && crew_get_shutdown(crew) != TRUE; i++) {
     BROWSER B = (BROWSER)array_get(browsers, i);
-	B.interval_time = my.intervalSecs;
+	browser_set_interval_time(B, my.intervalSecs);
     result = crew_add(crew, (void*)start, B);
     if (result == FALSE) { 
       my.verbose = FALSE;
@@ -554,9 +554,10 @@ main(int argc, char *argv[])
     fprintf(stderr, "Longest transaction:\t%12.2f\n",        data_get_highest(data));
     fprintf(stderr, "Shortest transaction:\t%12.2f\n",       data_get_lowest(data));
 	fprintf(stderr, "Hits rate graph:\n");
-    int count = data->hits_array_num;
+    int count = data_get_hits_array_num(data);
+	unsigned int *hits_array = data_get_hits_array(data);
 	for (j = 1; j <= count; j++)
-      fprintf(stderr, "%d-%d:%d\n", j*my.intervalTime, j*my.intervalTime, data->hits_array[j-1]);
+      fprintf(stderr, "%d-%d:%d\n", j*my.intervalTime, j*my.intervalTime, hits_array[j-1]);
 	
     fprintf(stderr, " \n");
   }
