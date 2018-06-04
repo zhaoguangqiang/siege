@@ -179,7 +179,7 @@ parse_rc_cmdline(int argc, char *argv[])
   strcpy(my.rc, "");
   
   while( a > -1 ){
-    a = getopt_long(argc, argv, "VhvqCDNFpgl::ibr:t:f:d:c:m:H:R:A:T:", long_options, (int*)0);
+    a = getopt_long(argc, argv, "VhvqCDNFpgl::ibr:t:f:d:c:m:H:R:A:T:I:", long_options, (int*)0);
     if(a == 'R'){
       strcpy(my.rc, optarg);
       a = -1;
@@ -273,6 +273,7 @@ parse_cmdline(int argc, char *argv[])
 	  	parse_time(optarg, &time, &secs);
 		my.intervalTime = time;
 		my.intervalSecs = secs;
+		break;
       case 'f':
         memset(my.file, 0, sizeof(my.file));
         if(optarg == NULL) break; /*paranoia*/

@@ -52,6 +52,7 @@ void  data_set_start      (DATA this);
 void  data_set_stop       (DATA this);
 void  data_set_highest    (DATA this, float highest);
 void  data_set_lowest     (DATA this, float lowest);
+void  data_set_hits_array(DATA this, unsigned int *hits_array, int array_num);
 void  data_increment_bytes(DATA this, unsigned long bytes);
 void  data_increment_count(DATA this, unsigned long count);
 void  data_increment_total(DATA this, float total);
@@ -75,5 +76,6 @@ unsigned int data_get_count(DATA this);
 unsigned int data_get_code (DATA this);
 unsigned int data_get_fail (DATA this);
 unsigned int data_get_okay (DATA this);
+unsigned int data_get_hits_array_num(DATA this);
 
 #endif/*__DATA_H*/
