@@ -447,7 +447,11 @@ load_conf(char *filename)
       }
     }
     else if (strmatch(option, "time")) {
-      parse_time(value);
+      int time = 0;
+	  int secs = 0;
+      parse_time(value, &time, &secs);
+	  my.time = time;
+	  my.secs = secs;
     }
     else if (strmatch(option, "delay")) {
       if (value != NULL) {

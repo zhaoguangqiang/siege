@@ -52,13 +52,16 @@ void  data_set_start      (DATA this);
 void  data_set_stop       (DATA this);
 void  data_set_highest    (DATA this, float highest);
 void  data_set_lowest     (DATA this, float lowest);
-void  data_set_hits_array(DATA this, unsigned int *hits_array, int array_num);
 void  data_increment_bytes(DATA this, unsigned long bytes);
 void  data_increment_count(DATA this, unsigned long count);
 void  data_increment_total(DATA this, float total);
 void  data_increment_code (DATA this, int code);
 void  data_increment_fail (DATA this, int fail);
 void  data_increment_okay (DATA this, int ok200);
+
+void  data_sort_request_time      (DATA this);
+void  data_set_hits_array         (DATA this, unsigned int *hits_array, unsigned int array_num);
+void  data_set_request_time_array (DATA this, float *request_time_array, unsigned int array_num);
 
 /* getters */
 float    data_get_total(DATA this);
@@ -76,6 +79,9 @@ unsigned int data_get_count(DATA this);
 unsigned int data_get_code (DATA this);
 unsigned int data_get_fail (DATA this);
 unsigned int data_get_okay (DATA this);
+unsigned int *data_get_hits_array(DATA this);
 unsigned int data_get_hits_array_num(DATA this);
+float *data_get_percentage_array(DATA this);
+float *data_get_request_percentage_array(DATA this);
 
 #endif/*__DATA_H*/

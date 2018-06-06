@@ -225,11 +225,11 @@ parse_cmdline(int argc, char *argv[])
         my.bench    = TRUE;
         break;
       case 'd':
-	/* XXX range checking? use strtol? */
+    /* XXX range checking? use strtol? */
         my.delay   = atof(optarg);
-	if(my.delay < 0){
-	  my.delay = 0; 
-	}
+    if(my.delay < 0){
+      my.delay = 0; 
+    }
         break;
       case 'g':
         my.get = TRUE;
@@ -266,14 +266,14 @@ parse_cmdline(int argc, char *argv[])
         break;
       case 't':
         parse_time(optarg, &time, &secs);
-		my.time = time;
-		my.secs = secs;
+        my.time = time;
+        my.secs = secs;
         break;
       case 'I':
-	  	parse_time(optarg, &time, &secs);
-		my.intervalTime = time;
-		my.intervalSecs = secs;
-		break;
+          parse_time(optarg, &time, &secs);
+        my.intervalTime = time;
+        my.intervalSecs = secs;
+        break;
       case 'f':
         memset(my.file, 0, sizeof(my.file));
         if(optarg == NULL) break; /*paranoia*/
@@ -495,7 +495,7 @@ main(int argc, char *argv[])
   data_set_start(data);
   for (i = 0; i < my.cusers && crew_get_shutdown(crew) != TRUE; i++) {
     BROWSER B = (BROWSER)array_get(browsers, i);
-	browser_set_interval_time(B, my.intervalSecs);
+    browser_set_interval_time(B, my.intervalSecs);
     result = crew_add(crew, (void*)start, B);
     if (result == FALSE) { 
       my.verbose = FALSE;
@@ -523,11 +523,11 @@ main(int argc, char *argv[])
     data_increment_fail (data, browser_get_fail(B));
     data_set_highest    (data, browser_get_himark(B));
     data_set_lowest     (data, browser_get_lomark(B));
-	int j =0;
-	int count = browser_get_hits_array_num(B);
-	for (j = 0; j < count; j++)
-		data_set_hits_array(data, browser_get_hits_array(B), count);
+    data_set_hits_array (data, browser_get_hits_array(B), browser_get_hits_array_num(B));
+    data_set_request_time_array(data, browser_get_request_time_array(B), browser_get_request_time_array_count(B));
   } crew_destroy(crew);
+
+  data_sort_request_time(data);
 
   pthread_usleep_np(10000);
 
@@ -554,13 +554,21 @@ main(int argc, char *argv[])
     fprintf(stderr, "Failed transactions:\t%12u\n",          my.failed);
     fprintf(stderr, "Longest transaction:\t%12.2f\n",        data_get_highest(data));
     fprintf(stderr, "Shortest transaction:\t%12.2f\n",       data_get_lowest(data));
-	fprintf(stderr, "Hits rate graph:\n");
+    fprintf(stderr, "Hits rate graph:\n");
+
     int count = data_get_hits_array_num(data);
-	unsigned int *hits_array = data_get_hits_array(data);
-	for (j = 1; j <= count; j++)
-      fprintf(stderr, "%d-%d:%d\n", j*my.intervalTime, j*my.intervalTime, hits_array[j-1]);
-	
-    fprintf(stderr, " \n");
+    unsigned int *hits_array = data_get_hits_array(data);
+    printf(stderr, "count:%d,interval:%d\n", count, my.intervalSecs);
+    for (j = 0; j < count; j++)
+      fprintf(stderr, "\t%d-%d:%d\n", j*my.intervalSecs, (j+1)*my.intervalSecs, hits_array[j + 1]);
+
+    float *percentage = data_get_percentage_array(data);
+    float *request_percentage = data_get_request_percentage_array(data);
+    fprintf(stderr, "Percentage of the requests served within a certain time (ms)\n");
+    fprintf(stderr, "------------------------------------------------------------\n");
+    for (j = 0; j < 9; j++) {
+      fprintf(stderr, "\t%lf, %lf\n", percentage[j], request_percentage[j]);
+    }
   }
   if (my.mark)    mark_log_file(my.markstr);
   if (my.logging) {

@@ -48,6 +48,8 @@
 static pthread_once_t once = PTHREAD_ONCE_INIT;
 #endif/*SIGNAL_CLIENT_PLATFORM*/
 
+#define DEFAULT_REQUEST_TIME_ARRAY_CAPACTIY 16
+
 float __himark = 0;
 float __lomark = -1;
 
@@ -98,6 +100,10 @@ struct BROWSER_T
   unsigned int  interval_time;
   unsigned int  *hits_array;
   unsigned int  interval_count;
+
+  float  *request_time_array;
+  unsigned int  request_time_array_count;
+  unsigned int  request_time_array_capacity;
   
   unsigned int  code;
   unsigned int  count;
@@ -150,7 +156,13 @@ new_browser(int id)
   this->rseed     = urandom();
 
   this->begin     = times(&t_start);
-  this->hits_array= NULL;
+  this->hits_array= (unsigned int*)xmalloc(256 * sizeof(unsigned int));
+
+  this->request_time_array_count = 0;
+  this->request_time_array_capacity = DEFAULT_REQUEST_TIME_ARRAY_CAPACTIY;
+  this->request_time_array = (float*)xmalloc(DEFAULT_REQUEST_TIME_ARRAY_CAPACTIY * sizeof(float));
+
+  memset(this->hits_array, 0, 256);
   this->interval_count = 0;
   this->interval_time  = 0;
   return this;
@@ -174,8 +186,10 @@ browser_destroy(BROWSER this)
       this->parts = array_destroy(this->parts);
     }
 
-    if (this->hits_array != NULL)
+    //if (this->hits_array != NULL)
 	  xfree(this->hits_array);
+
+	xfree(this->request_time_array);
 		
     xfree(this);
   }
@@ -186,13 +200,25 @@ browser_destroy(BROWSER this)
 unsigned int *
 browser_get_hits_array(BROWSER this)
 {
-	return this->hits_array;
+  return this->hits_array;
 }
 
 unsigned int
 browser_get_hits_array_num(BROWSER this)
 {
-	return this->interval_count;
+  return this->interval_count;
+}
+
+float *
+browser_get_request_time_array(BROWSER this)
+{
+  return this->request_time_array;
+}
+
+unsigned int
+browser_get_request_time_array_count(BROWSER this)
+{
+  return this->request_time_array_count;
 }
 
 unsigned long
@@ -441,6 +467,30 @@ __request(BROWSER this, URL U) {
   }
 }
 
+void browser_set_interval_count(BROWSER this, unsigned int stop)
+{
+  if (this->interval_time != 0)
+  {
+    int interval_num = elapsed_time(stop - this->begin)/this->interval_time;
+	if (interval_num < 256)
+	{
+      this->interval_count = interval_num + 1;
+      this->hits_array[this->interval_count] = this->hits;
+	}
+  }
+}
+
+void browser_set_request_time(BROWSER this, float etime)
+{
+  if (this->request_time_array_count >= this->request_time_array_capacity)
+  {
+	this->request_time_array_capacity *= 2;
+    this->request_time_array = (float*)realloc(this->request_time_array, this->request_time_array_capacity * sizeof(float));
+  }
+  this->request_time_array[this->request_time_array_count] = etime;
+  this->request_time_array_count++;
+}
+
 /**
  * HTTP client request.
  * The protocol is executed in http.c
@@ -542,6 +592,8 @@ __http(BROWSER this, URL U)
     this->hits ++;
     this->time += etime;
     this->fail += 1;
+    browser_set_interval_count(this, stop);
+	browser_set_request_time(this, etime);
 
     __display_result(this, resp, U, 0, etime);
     resp = response_destroy(resp);
@@ -751,9 +803,8 @@ __http(BROWSER this, URL U)
 
   this->hits++;
 
-  int interval_num = (stop - this->begin)/this->interval_time;
-  this->hits_array[interval_num] = this->hits;
-  this->interval_count = interval_num;
+  browser_set_interval_count(this, stop);
+  browser_set_request_time(this, etime);
   	
   resp = response_destroy(resp);
 

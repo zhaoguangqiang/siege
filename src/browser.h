@@ -46,4 +46,7 @@ unsigned int browser_get_fail(BROWSER this);
 float    browser_get_himark(BROWSER this);
 float    browser_get_lomark(BROWSER this);
 
+float *browser_get_request_time_array(BROWSER this);
+unsigned int browser_get_request_time_array_count(BROWSER this);
+
 #endif/*__BROWSER_H*/
