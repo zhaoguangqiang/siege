@@ -45,7 +45,6 @@
 # endif/*HAVE_SYS_TIME_H   */
 #endif /*TIME_WITH_SYS_TIME*/
 
-
 struct DATA_T
 {
   float    total;  /*ttime*/
@@ -68,8 +67,8 @@ struct DATA_T
 
   float *request_time_array;
   unsigned int  request_time_array_num;
-  float percentage_array[9];
-  float request_percentage_array[9];
+  
+  struct PERCENTAGE_ARRAY_T percentage_array[9];
 };
 
 DATA
@@ -95,15 +94,16 @@ new_data()
   this->request_time_array = NULL;
   this->request_time_array_num = 0;
 
-  this->percentage_array[0] = 0.50;
-  this->percentage_array[1] = 0.66;
-  this->percentage_array[2] = 0.75;
-  this->percentage_array[3] = 0.80;
-  this->percentage_array[4] = 0.90;
-  this->percentage_array[5] = 0.95;
-  this->percentage_array[6] = 0.98;
-  this->percentage_array[7] = 0.99;
-  this->percentage_array[8] = 1.00;
+  PERCENTAGE_ARRAY array = this->percentage_array;
+  array[0].percentage = 0.50;
+  array[1].percentage = 0.66;
+  array[2].percentage = 0.75;
+  array[3].percentage = 0.80;
+  array[4].percentage = 0.90;
+  array[5].percentage = 0.95;
+  array[6].percentage = 0.98;
+  array[7].percentage = 0.99;
+  array[8].percentage = 1.00;
 
   return this;
 }
@@ -208,7 +208,6 @@ data_set_hits_array(DATA this, unsigned int *hits_array, unsigned int array_num)
 void
 data_set_request_time_array(DATA this, float *request_time_array, unsigned int array_num)
 {
-  printf("-----------------------array_num:%d, request_num:%d-----------------------------\n", array_num, this->request_time_array_num);
   unsigned int count = this->request_time_array_num;
   this->request_time_array_num += array_num;
   this->request_time_array = (float*)realloc(this->request_time_array, (this->request_time_array_num)*sizeof(float) + 1);
@@ -232,22 +231,17 @@ data_sort_request_time(DATA this)
 {
   qsort(this->request_time_array, this->request_time_array_num, sizeof(float), compare_request_time);
   int array_size = sizeof(this->percentage_array)/sizeof(this->percentage_array[0]);
-  for (int i = 0; i < array_size; i++){
-    int location = this->request_time_array_num * this->percentage_array[i];
-    this->request_percentage_array[i] = this->request_time_array[location - 1];
+  for (int i = 0; i < array_size; i++) {
+    int location = this->request_time_array_num * this->percentage_array[i].percentage;
+    this->percentage_array[i].request_time = this->request_time_array[location - 1];
   }
 }
 
-float *
-data_get_percentage_array(DATA this)
+PERCENTAGE_ARRAY
+data_get_request_percentage_array(DATA this, int *row_num)
 {
+  *row_num = sizeof(this->percentage_array)/sizeof(this->percentage_array[0]);
   return this->percentage_array;
-}
-
-float *
-data_get_request_percentage_array(DATA this)
-{
-  return this->request_percentage_array;
 }
 
 unsigned int

@@ -41,7 +41,14 @@
 # endif/*HAVE_SYS_TIME_H   */
 #endif /*TIME_WITH_SYS_TIME*/
 
+struct PERCENTAGE_ARRAY_T 
+{
+  float percentage;
+  float request_time;
+};
+
 typedef struct DATA_T *DATA;
+typedef struct PERCENTAGE_ARRAY_T *PERCENTAGE_ARRAY;
 
 /* constructor */
 DATA  new_data();
@@ -82,6 +89,6 @@ unsigned int data_get_okay (DATA this);
 unsigned int *data_get_hits_array(DATA this);
 unsigned int data_get_hits_array_num(DATA this);
 float *data_get_percentage_array(DATA this);
-float *data_get_request_percentage_array(DATA this);
+PERCENTAGE_ARRAY data_get_request_percentage_array(DATA this, int *row_num);
 
 #endif/*__DATA_H*/

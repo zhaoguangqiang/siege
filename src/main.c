@@ -271,8 +271,8 @@ parse_cmdline(int argc, char *argv[])
         break;
       case 'I':
           parse_time(optarg, &time, &secs);
-        my.intervalTime = time;
-        my.intervalSecs = secs;
+        my.intervaltime = time;
+        my.intervalsecs = secs;
         break;
       case 'f':
         memset(my.file, 0, sizeof(my.file));
@@ -495,7 +495,7 @@ main(int argc, char *argv[])
   data_set_start(data);
   for (i = 0; i < my.cusers && crew_get_shutdown(crew) != TRUE; i++) {
     BROWSER B = (BROWSER)array_get(browsers, i);
-    browser_set_interval_time(B, my.intervalSecs);
+    browser_set_interval_time(B, my.intervalsecs);
     result = crew_add(crew, (void*)start, B);
     if (result == FALSE) { 
       my.verbose = FALSE;
@@ -536,39 +536,42 @@ main(int argc, char *argv[])
       fprintf(stderr, "%s aborted due to excessive socket failure; you\n", program_name);
       fprintf(stderr, "can change the failure threshold in $HOME/.%src\n", program_name);
     }
-    fprintf(stderr, "\nTransactions:\t\t%12u hits\n",        data_get_count(data));
-    fprintf(stderr, "Availability:\t\t%12.2f %%\n",          data_get_count(data)==0 ? 0 :
+    fprintf(stderr, "\n\nReport for Performance Test\n");
+	fprintf(stderr, "============================================================\n\n");
+    fprintf(stderr, "\nTransactions:\t\t%12u hits\n\n",        data_get_count(data));
+    fprintf(stderr, "Availability:\t\t%12.2f %%\n\n",          data_get_count(data)==0 ? 0 :
                                                              (double)data_get_count(data) /
                                                              (data_get_count(data)+my.failed)*100
     );
-    fprintf(stderr, "Elapsed time:\t\t%12.2f secs\n",        data_get_elapsed(data));
-    fprintf(stderr, "Data transferred:\t%12.2f MB\n",        data_get_megabytes(data)); /*%12llu*/
-    fprintf(stderr, "Response time:\t\t%12.2f secs\n",       data_get_response_time(data));
-    fprintf(stderr, "Transaction rate:\t%12.2f trans/sec\n", data_get_transaction_rate(data));
-    fprintf(stderr, "Throughput:\t\t%12.2f MB/sec\n",        data_get_throughput(data));
-    fprintf(stderr, "Concurrency:\t\t%12.2f\n",              data_get_concurrency(data));
-    fprintf(stderr, "Successful transactions:%12u\n",        data_get_code(data)); 
+    fprintf(stderr, "Elapsed time:\t\t%12.2f secs\n\n",        data_get_elapsed(data));
+    fprintf(stderr, "Data transferred:\t%12.2f MB\n\n",        data_get_megabytes(data)); /*%12llu*/
+    fprintf(stderr, "Response time:\t\t%12.2f secs\n\n",       data_get_response_time(data));
+    fprintf(stderr, "Transaction rate:\t%12.2f trans/sec\n\n", data_get_transaction_rate(data));
+    fprintf(stderr, "Throughput:\t\t%12.2f MB/sec\n\n",        data_get_throughput(data));
+    fprintf(stderr, "Concurrency:\t\t%12.2f\n\n",              data_get_concurrency(data));
+    fprintf(stderr, "Successful transactions:%12u\n\n",        data_get_code(data)); 
     if (my.debug) {
-      fprintf(stderr, "HTTP OK received:\t%12u\n",             data_get_okay(data));
+      fprintf(stderr, "HTTP OK received:\t%12u\n\n",             data_get_okay(data));
     }
-    fprintf(stderr, "Failed transactions:\t%12u\n",          my.failed);
-    fprintf(stderr, "Longest transaction:\t%12.2f\n",        data_get_highest(data));
-    fprintf(stderr, "Shortest transaction:\t%12.2f\n",       data_get_lowest(data));
-    fprintf(stderr, "Hits rate graph:\n");
+    fprintf(stderr, "Failed transactions:\t%12u\n\n",          my.failed);
+    fprintf(stderr, "Longest transaction:\t%12.2f\n\n",        data_get_highest(data));
+    fprintf(stderr, "Shortest transaction:\t%12.2f\n\n",       data_get_lowest(data));
 
+    fprintf(stderr, "Hits rate graph:\n");
+    fprintf(stderr, "----------------\n::\n\n");
     int count = data_get_hits_array_num(data);
     unsigned int *hits_array = data_get_hits_array(data);
-    printf(stderr, "count:%d,interval:%d\n", count, my.intervalSecs);
     for (j = 0; j < count; j++)
-      fprintf(stderr, "\t%d-%d:%d\n", j*my.intervalSecs, (j+1)*my.intervalSecs, hits_array[j + 1]);
+      fprintf(stderr, "\t%d-%d(s):\t\t%d\n", j*my.intervalsecs, (j+1)*my.intervalsecs, hits_array[j + 1]);
+	fprintf(stderr, "\n");
 
-    float *percentage = data_get_percentage_array(data);
-    float *request_percentage = data_get_request_percentage_array(data);
-    fprintf(stderr, "Percentage of the requests served within a certain time (ms)\n");
-    fprintf(stderr, "------------------------------------------------------------\n");
-    for (j = 0; j < 9; j++) {
-      fprintf(stderr, "\t%lf, %lf\n", percentage[j], request_percentage[j]);
-    }
+    fprintf(stderr, "Percentage of the requests served within a certain time (s):\n");
+    fprintf(stderr, "------------------------------------------------------------\n::\n\n");
+    int row_num = 0;
+	PERCENTAGE_ARRAY array = data_get_request_percentage_array(data, &row_num);
+    for (j = 0; j < row_num; j++)
+      fprintf(stderr, "\t%d%%\t%lf\n", (int)(array[j].percentage * 100), array[j].request_time);
+	fprintf(stderr, "\n");
   }
   if (my.mark)    mark_log_file(my.markstr);
   if (my.logging) {
